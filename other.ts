@@ -21,3 +21,5 @@ function getDbid(id: number | string) {
 
 const singledataallowed: number[] | string[] = ["a", "b"];
 const bothdataallowed: (string | number)[] = [1, "s"];
+
+export {};

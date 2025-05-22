@@ -22,4 +22,7 @@ function getDbid(id: number | string) {
 const singledataallowed: number[] | string[] = ["a", "b"];
 const bothdataallowed: (string | number)[] = [1, "s"];
 
-export {};
+// usefull ts
+
+let seatallotment: "middle" | "window";
+seatallotment = "window"; // if i try to enter any other thing it will not allow me to do that

@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Triangle Counting Game</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Arial", sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        color: white;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      }
+
+      .game-container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        max-width: 1200px;
+        width: 100%;
+      }
+
+      .controls {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+      }
+
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      label {
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+
+      input[type="number"] {
+        padding: 10px;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        text-align: center;
+        width: 100px;
+        background: rgba(255, 255, 255, 0.9);
+      }
+
+      .guess-input {
+        width: 120px !important;
+        font-size: 18px !important;
+        font-weight: bold;
+        border: 3px solid #ffd700;
+      }
+
+      .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin: 5px;
+      }
+
+      .btn-primary {
+        background: #4caf50;
+        color: white;
+      }
+
+      .btn-secondary {
+        background: #2196f3;
+        color: white;
+      }
+
+      .btn-danger {
+        background: #f44336;
+        color: white;
+      }
+
+      .btn-warning {
+        background: #ff9800;
+        color: white;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .game-area {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+      }
+
+      .triangle-display {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+      }
+
+      .triangle-grid {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        margin: 20px 0;
+      }
+
+      .triangle-row {
+        display: flex;
+        gap: 5px;
+      }
+
+      .triangle {
+        width: 30px;
+        height: 26px;
+        background: #ffd700;
+        clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        transition: all 0.3s ease;
+        position: relative;
+      }
+
+      .triangle.correct {
+        background: #4caf50;
+        transform: scale(1.1);
+        box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+      }
+
+      .triangle.wrong {
+        background: #f44336;
+        transform: scale(1.1);
+        box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+      }
+
+      .triangle.highlight {
+        animation: pulse 1s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.2);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .guess-section {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 15px;
+        padding: 25px;
+        text-align: center;
+      }
+
+      .guess-box {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+        margin: 15px 0;
+      }
+
+      .results-area {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+
+      .algorithm-comparison {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-top: 20px;
+      }
+
+      .algorithm-card {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 15px;
+      }
+
+      .step-visualization {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 15px;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .step {
+        padding: 8px;
+        margin: 5px 0;
+        border-radius: 5px;
+        background: rgba(255, 255, 255, 0.1);
+        font-family: monospace;
+        animation: fadeIn 0.5s ease-in;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .score-board {
+        text-align: center;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 20px;
+        margin-top: 20px;
+      }
+
+      .answer-feedback {
+        margin-top: 15px;
+        padding: 20px;
+        border-radius: 10px;
+        font-weight: bold;
+        font-size: 1.2em;
+      }
+
+      .correct-answer {
+        background: rgba(76, 175, 80, 0.3);
+        border: 3px solid #4caf50;
+        color: #4caf50;
+      }
+
+      .incorrect-answer {
+        background: rgba(244, 67, 54, 0.3);
+        border: 3px solid #f44336;
+        color: #f44336;
+      }
+
+      .visualization-feedback {
+        margin-top: 15px;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+      }
+
+      .difference-display {
+        font-size: 1.5em;
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 8px;
+      }
+
+      .perfect {
+        background: rgba(76, 175, 80, 0.2);
+        color: #4caf50;
+      }
+      .close {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+      }
+      .far {
+        background: rgba(244, 67, 54, 0.2);
+        color: #f44336;
+      }
+
+      @media (max-width: 768px) {
+        .game-area,
+        .algorithm-comparison {
+          grid-template-columns: 1fr;
+        }
+
+        .controls {
+          flex-direction: column;
+          align-items: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>🔺 Triangle Counting Algorithm Game 🔺</h1>
+      <p>Count the triangles and enter your guess!</p>
+    </div>
+
+    <div class="game-container">
+      <div class="controls">
+        <div class="input-group">
+          <label for="nValue">Grid Size (n):</label>
+          <input type="number" id="nValue" min="1" max="8" value="3" />
+        </div>
+        <button class="btn btn-primary" onclick="startNewGame()">
+          🚀 Start New Game
+        </button>
+        <button class="btn btn-secondary" onclick="stepByStep()">
+          📝 Show Algorithm Steps
+        </button>
+        <button class="btn btn-danger" onclick="resetGame()">🔄 Reset</button>
+      </div>
+
+      <div class="game-area">
+        <div class="triangle-display">
+          <h3>Triangle Grid (n = <span id="displayN">3</span>)</h3>
+          <p>Study this grid and count ALL triangles you can see!</p>
+          <div id="triangleGrid" class="triangle-grid"></div>
+          <div
+            id="visualizationFeedback"
+            class="visualization-feedback"
+            style="display: none"
+          >
+            <p><strong>Visualization after your guess:</strong></p>
+            <div id="triangleExplanation"></div>
+          </div>
+        </div>
+
+        <div class="guess-section">
+          <h3>🎯 Make Your Guess</h3>
+          <p>How many triangles do you count in total?</p>
+
+          <div class="guess-box">
+            <label for="userGuess" style="display: block; margin-bottom: 10px"
+              >Your Answer:</label
+            >
+            <input
+              type="number"
+              id="userGuess"
+              class="guess-input"
+              min="0"
+              max="1000"
+              placeholder="?"
+              onkeypress="handleEnterKey(event)"
+            />
+            <br /><br />
+            <button
+              class="btn btn-warning"
+              onclick="submitGuess()"
+              id="submitBtn"
+            >
+              🔍 Submit Answer
+            </button>
+          </div>
+
+          <div id="answerFeedback"></div>
+
+          <div style="margin-top: 20px">
+            <button
+              class="btn btn-secondary"
+              onclick="showHint()"
+              id="hintBtn"
+              style="display: none"
+            >
+              💡 Give me a hint
+            </button>
+            <button
+              class="btn btn-primary"
+              onclick="showVisualization()"
+              id="visualizeBtn"
+              style="display: none"
+            >
+              👁️ Show Triangles
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="results-area">
+        <h3>📊 Game Results</h3>
+        <div id="results">
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+              gap: 20px;
+            "
+          >
+            <div>
+              <p>
+                <strong>Algorithm Result:</strong>
+                <span id="algorithmResult">-</span>
+              </p>
+              <p><strong>Your Guess:</strong> <span id="userResult">-</span></p>
+            </div>
+            <div>
+              <p><strong>Difference:</strong> <span id="difference">-</span></p>
+              <p>
+                <strong>Status:</strong>
+                <span id="gameStatus">Ready to play!</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="algorithm-comparison">
+        <div class="algorithm-card">
+          <h3>🔄 Recursive Algorithm</h3>
+          <code>CountTriangles(n-1) + 3×(n-1)×(n-1)</code>
+          <div id="recursiveSteps" class="step-visualization">
+            <p>Click "Show Algorithm Steps" to see recursive calls</p>
+          </div>
+        </div>
+
+        <div class="algorithm-card">
+          <h3>⚡ Iterative Algorithm</h3>
+          <code>total += 3×(i-1)×(i-1) for i=2 to n</code>
+          <div id="iterativeSteps" class="step-visualization">
+            <p>Click "Show Algorithm Steps" to see iteration steps</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="score-board">
+        <h3>🏆 Game Stats</h3>
+        <div
+          style="
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            text-align: center;
+          "
+        >
+          <div>
+            <p style="font-size: 2em; color: #ffd700">
+              <span id="gamesPlayed">0</span>
+            </p>
+            <p>Games Played</p>
+          </div>
+          <div>
+            <p style="font-size: 2em; color: #4caf50">
+              <span id="correctAnswers">0</span>
+            </p>
+            <p>Correct Answers</p>
+          </div>
+          <div>
+            <p style="font-size: 2em; color: #2196f3">
+              <span id="accuracyRate">0%</span>
+            </p>
+            <p>Accuracy Rate</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Game state
+      let gameState = {
+        n: 3,
+        totalTriangles: 0,
+        userGuess: null,
+        gamesPlayed: 0,
+        correctAnswers: 0,
+        gameActive: false,
+        hintShown: false,
+        visualizationShown: false,
+      };
+
+      // Load saved stats
+      if (localStorage.getItem("triangleGameStats")) {
+        const savedStats = JSON.parse(
+          localStorage.getItem("triangleGameStats")
+        );
+        gameState.gamesPlayed = savedStats.gamesPlayed || 0;
+        gameState.correctAnswers = savedStats.correctAnswers || 0;
+      }
+
+      function countTrianglesRecursive(n, steps = []) {
+        if (n === 1) {
+          steps.push(`Base case: n=1, return 1`);
+          return 1;
+        } else {
+          const prevResult = countTrianglesRecursive(n - 1, steps);
+          const currentAdd = 3 * (n - 1) * (n - 1);
+          const result = prevResult + currentAdd;
+          steps.push(
+            `n=${n}: CountTriangles(${n - 1}) + 3×(${n - 1})×(${
+              n - 1
+            }) = ${prevResult} + ${currentAdd} = ${result}`
+          );
+          return result;
+        }
+      }
+
+      function countTrianglesIterative(n, steps = []) {
+        let total = 1;
+        steps.push(`Initialize: total = 1 (base case for n=1)`);
+
+        for (let i = 2; i <= n; i++) {
+          const addValue = 3 * (i - 1) * (i - 1);
+          const oldTotal = total;
+          total += addValue;
+          steps.push(
+            `i=${i}: total = ${oldTotal} + 3×(${i - 1})×(${
+              i - 1
+            }) = ${oldTotal} + ${addValue} = ${total}`
+          );
+        }
+
+        return total;
+      }
+
+      // Generate triangle grid visualization
+      function generateTriangleGrid(n) {
+        const grid = document.getElementById("triangleGrid");
+        grid.innerHTML = "";
+
+        for (let row = 0; row < n; row++) {
+          const rowDiv = document.createElement("div");
+          rowDiv.className = "triangle-row";
+
+          const trianglesInRow = 2 * row + 1;
+          for (let col = 0; col < trianglesInRow; col++) {
+            const triangle = document.createElement("div");
+            triangle.className = "triangle";
+            triangle.dataset.id = `${row}-${col}`;
+            triangle.title = `Triangle ${row}-${col}`;
+            rowDiv.appendChild(triangle);
+          }
+
+          grid.appendChild(rowDiv);
+        }
+      }
+
+      function startNewGame() {
+        const n = parseInt(document.getElementById("nValue").value);
+        if (n < 1 || n > 10) {
+          alert("Please enter a value between 1 and 8");
+          return;
+        }
+
+        gameState.n = n;
+        gameState.gameActive = true;
+        gameState.hintShown = false;
+        gameState.visualizationShown = false;
+        gameState.userGuess = null;
+
+        document.getElementById("displayN").textContent = n;
+
+        // Generate grid
+        generateTriangleGrid(n);
+
+        // Calculate the correct answer
+        const recursiveSteps = [];
+        const iterativeSteps = [];
+
+        const startRecursive = performance.now();
+        const recursiveResult = countTrianglesRecursive(n, recursiveSteps);
+        const endRecursive = performance.now();
+
+        const startIterative = performance.now();
+        const iterativeResult = countTrianglesIterative(n, iterativeSteps);
+        const endIterative = performance.now();
+
+        gameState.totalTriangles = recursiveResult;
+
+        // Display algorithm result (hidden from user until they guess)
+        document.getElementById("algorithmResult").textContent =
+          recursiveResult;
+        document.getElementById("recursiveTime").textContent = (
+          endRecursive - startRecursive
+        ).toFixed(3);
+        document.getElementById("iterativeTime").textContent = (
+          endIterative - startIterative
+        ).toFixed(3);
+
+        // Reset UI
+        document.getElementById("userGuess").value = "";
+        document.getElementById("userGuess").focus();
+        document.getElementById("answerFeedback").innerHTML = "";
+        document.getElementById("userResult").textContent = "-";
+        document.getElementById("difference").textContent = "-";
+        document.getElementById("gameStatus").textContent =
+          "Game active - make your guess!";
+        document.getElementById("submitBtn").disabled = false;
+        document.getElementById("hintBtn").style.display = "none";
+        document.getElementById("visualizeBtn").style.display = "none";
+        document.getElementById("visualizationFeedback").style.display = "none";
+
+        // Clear algorithm steps
+        document.getElementById("recursiveSteps").innerHTML =
+          '<p>Click "Show Algorithm Steps" to see the calculation process</p>';
+        document.getElementById("iterativeSteps").innerHTML =
+          '<p>Click "Show Algorithm Steps" to see the calculation process</p>';
+
+        updateStats();
+      }
+
+      function submitGuess() {
+        if (!gameState.gameActive) {
+          alert("Please start a new game first!");
+          return;
+        }
+
+        const guessInput = document.getElementById("userGuess");
+        const guess = parseInt(guessInput.value);
+
+        if (isNaN(guess) || guess < 0) {
+          alert("Please enter a valid number!");
+          guessInput.focus();
+          return;
+        }
+
+        gameState.userGuess = guess;
+        gameState.gamesPlayed++;
+        gameState.gameActive = false;
+
+        const difference = guess - gameState.totalTriangles;
+        const feedbackDiv = document.getElementById("answerFeedback");
+
+        // Update results display
+        document.getElementById("userResult").textContent = guess;
+
+        if (difference === 0) {
+          // Perfect answer
+          feedbackDiv.innerHTML = `
+                    <div class="answer-feedback correct-answer">
+                        🎉 PERFECT! 🎉<br>
+                        You got exactly ${gameState.totalTriangles} triangles!<br>
+                        <div class="difference-display perfect">Difference: 0 (Perfect!)</div>
+                    </div>
+                `;
+          gameState.correctAnswers++;
+          document.getElementById("gameStatus").textContent =
+            "✅ Perfect Answer!";
+          document.getElementById("difference").textContent = "Perfect! (0)";
+        } else {
+          // Incorrect answer
+          const absDiv = Math.abs(difference);
+          const diffClass = absDiv <= 2 ? "close" : "far";
+          const diffText =
+            difference > 0
+              ? `${difference} too high`
+              : `${Math.abs(difference)} too low`;
+
+          feedbackDiv.innerHTML = `
+                    <div class="answer-feedback incorrect-answer">
+                        ${absDiv <= 2 ? "🔶 Close!" : "❌ Not quite right!"}<br>
+                        You guessed ${guess}, but there are ${
+            gameState.totalTriangles
+          } triangles.<br>
+                        <div class="difference-display ${diffClass}">Difference: ${diffText}</div>
+                    </div>
+                `;
+          document.getElementById("gameStatus").textContent =
+            absDiv <= 2 ? "🔶 Close!" : "❌ Incorrect";
+          document.getElementById("difference").textContent = diffText;
+          document.getElementById("hintBtn").style.display = "inline-block";
+          document.getElementById("visualizeBtn").style.display =
+            "inline-block";
+        }
+
+        document.getElementById("submitBtn").disabled = true;
+        updateStats();
+        saveStats();
+      }
+
+      function showHint() {
+        if (gameState.hintShown) return;
+        gameState.hintShown = true;
+
+        const feedbackDiv = document.getElementById("answerFeedback");
+        const currentContent = feedbackDiv.innerHTML;
+
+        let hintText = "";
+        const diff = gameState.userGuess - gameState.totalTriangles;
+
+        if (diff > 0) {
+          hintText =
+            "💡 Hint: You're counting too many! Make sure you're only counting valid triangles that are actually formed by the grid lines.";
+        } else {
+          hintText =
+            "💡 Hint: You're missing some triangles! Look for triangles of different sizes - small ones can combine to form larger triangles.";
+        }
+
+        feedbackDiv.innerHTML =
+          currentContent +
+          `
+                <div style="margin-top: 15px; padding: 15px; background: rgba(255, 193, 7, 0.2); border: 2px solid #FFC107; border-radius: 10px; color: #FFC107;">
+                    ${hintText}
+                </div>
+            `;
+      }
+
+      function showVisualization() {
+        if (gameState.visualizationShown) return;
+        gameState.visualizationShown = true;
+
+        const visualDiv = document.getElementById("visualizationFeedback");
+        const explanationDiv = document.getElementById("triangleExplanation");
+
+        // Highlight all triangles to show them clearly
+        const triangles = document.querySelectorAll(".triangle");
+        triangles.forEach((triangle, index) => {
+          setTimeout(() => {
+            triangle.classList.add("highlight");
+            if (index < gameState.totalTriangles) {
+              triangle.classList.add("correct");
+            }
+          }, index * 100);
+        });
+
+        explanationDiv.innerHTML = `
+                <p><strong>Total triangles found by algorithm: ${gameState.totalTriangles}</strong></p>
+                <p>Your guess: ${gameState.userGuess}</p>
+                <p>The algorithm counts triangles of all sizes that can be formed in this ${gameState.n}×${gameState.n} triangular grid.</p>
+                <p style="margin-top: 10px; font-size: 0.9em; opacity: 0.8;">
+                    Note: This visualization highlights the pattern - the actual triangle counting involves 
+                    mathematical relationships rather than just visual counting.
+                </p>
+            `;
+
+        visualDiv.style.display = "block";
+      }
+
+      function stepByStep() {
+        const n =
+          gameState.n || parseInt(document.getElementById("nValue").value);
+        const recursiveSteps = [];
+        const iterativeSteps = [];
+
+        countTrianglesRecursive(n, recursiveSteps);
+        countTrianglesIterative(n, iterativeSteps);
+
+        // Display recursive steps
+        const recursiveContainer = document.getElementById("recursiveSteps");
+        recursiveContainer.innerHTML = "<h4>Recursive Algorithm Steps:</h4>";
+        recursiveSteps.forEach((step, index) => {
+          setTimeout(() => {
+            const stepDiv = document.createElement("div");
+            stepDiv.className = "step";
+            stepDiv.textContent = `${index + 1}. ${step}`;
+            recursiveContainer.appendChild(stepDiv);
+            recursiveContainer.scrollTop = recursiveContainer.scrollHeight;
+          }, index * 1000);
+        });
+
+        // Display iterative steps
+        const iterativeContainer = document.getElementById("iterativeSteps");
+        iterativeContainer.innerHTML = "<h4>Iterative Algorithm Steps:</h4>";
+        iterativeSteps.forEach((step, index) => {
+          setTimeout(() => {
+            const stepDiv = document.createElement("div");
+            stepDiv.className = "step";
+            stepDiv.textContent = `${index + 1}. ${step}`;
+            iterativeContainer.appendChild(stepDiv);
+            iterativeContainer.scrollTop = iterativeContainer.scrollHeight;
+          }, index * 800);
+        });
+      }
+
+      function resetGame() {
+        gameState.gameActive = false;
+        gameState.hintShown = false;
+        gameState.visualizationShown = false;
+        gameState.userGuess = null;
+
+        document.getElementById("userGuess").value = "";
+        document.getElementById("answerFeedback").innerHTML = "";
+        document.getElementById("userResult").textContent = "-";
+        document.getElementById("difference").textContent = "-";
+        document.getElementById("gameStatus").textContent =
+          "Reset - ready for new game!";
+        document.getElementById("submitBtn").disabled = false;
+        document.getElementById("hintBtn").style.display = "none";
+        document.getElementById("visualizeBtn").style.display = "none";
+        document.getElementById("visualizationFeedback").style.display = "none";
+
+        // Reset triangle styles
+        document.querySelectorAll(".triangle").forEach((triangle) => {
+          triangle.className = "triangle";
+        });
+      }
+
+      function handleEnterKey(event) {
+        if (event.key === "Enter") {
+          submitGuess();
+        }
+      }
+
+      function updateStats() {
+        document.getElementById("gamesPlayed").textContent =
+          gameState.gamesPlayed;
+        document.getElementById("correctAnswers").textContent =
+          gameState.correctAnswers;
+
+        const rate =
+          gameState.gamesPlayed > 0
+            ? (
+                (gameState.correctAnswers / gameState.gamesPlayed) *
+                100
+              ).toFixed(1)
+            : 0;
+        document.getElementById("accuracyRate").textContent = rate + "%";
+      }
+
+      function saveStats() {
+        localStorage.setItem(
+          "triangleGameStats",
+          JSON.stringify({
+            gamesPlayed: gameState.gamesPlayed,
+            correctAnswers: gameState.correctAnswers,
+          })
+        );
+      }
+
+      // Initialize the game
+      document.addEventListener("DOMContentLoaded", function () {
+        updateStats();
+        startNewGame();
+      });
+
+      // Auto-start new game when grid size changes
+      document.getElementById("nValue").addEventListener("change", function () {
+        const value = parseInt(this.value);
+        if (value >= 1 && value <= 8) {
+          setTimeout(startNewGame, 100);
+        }
+      });
+    </script>
+  </body>
+</html>
